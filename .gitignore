@@ -1,6 +1,11 @@
 <<<<<<< HEAD
 =======
-data/
+data/*
+!data/
+!data/manifests/
+!data/prepare_flickr8k.py
+data/data/
+
 
 >>>>>>> 43e001a (First real commit)
 # Byte-compiled / optimized / DLL files
