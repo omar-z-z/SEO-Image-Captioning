@@ -1,0 +1,90 @@
+Commands (PowerShell)
+
+Open PowerShell, cd to where you want the project, then run:
+
+# 1) create folders (run once)
+mkdir seo-image-captioning; cd seo-image-captioning
+mkdir data\data\raw\flickr8k, data\manifests, src\train, src\inference, src\evaluate, outputs, checkpoints, scripts
+
+# 2) (manual) put your Flickr8k files into:
+#    data\raw\flickr8k\Images\  and data\raw\flickr8k\Flickr8k.token.txt
+
+# 3) create manifest (quick one-liner that writes manifest from token file)
+python - <<'PY'
+import json, random, sys
+from pathlib import Path
+raw = Path("data/raw/flickr8k")
+tok = raw/"Flickr8k.token.txt"
+imgs = raw/"Images"
+assert tok.exists(), "put Flickr8k.token.txt in data/raw/flickr8k"
+caps = {}
+for L in tok.read_text(encoding="utf8").splitlines():
+    if not L.strip(): continue
+    key, text = (L.split("\t") if "\t" in L else L.split(" ",1))
+    fname = key.split("#")[0]
+    caps.setdefault(fname,[]).append(text.strip())
+items=[]
+for f,cs in caps.items():
+    p = imgs/f
+    if p.exists():
+        items.append({"image_id":f, "image_path":str(p), "captions":cs})
+if len(items)>500:
+    random.seed(42)
+    items = random.sample(items,500)
+out={"dataset":"Flickr8k","n_images":len(items),"items":items}
+outfile=Path("data/manifests/flickr8k.json")
+outfile.parent.mkdir(parents=True,exist_ok=True)
+outfile.write_text(json.dumps(out,indent=2),encoding="utf8")
+print("Wrote",outfile,"with",len(items),"images")
+PY
+
+# 4) train (assumes you have src/train/train_baseline.py from earlier)
+python src/train/train_baseline.py --manifest data/manifests/flickr8k.json --epochs 1 --batch_size 16 --ckpt_dir checkpoints
+
+# 5) generate (assumes you have src/inference/generate.py)
+python src/inference/generate.py --ckpt checkpoints/baseline_initial.pt --manifest data/manifests/flickr8k.json --out outputs/predictions.jsonl --num 200
+
+# 6) evaluate (assumes you have src/evaluate/eval_captions.py)
+python src/evaluate/eval_captions.py --pred outputs/predictions.jsonl --ref data/manifests/flickr8k.json
+
+Commands (Command Prompt / .bat style)
+md seo-image-captioning
+cd seo-image-captioning
+md data\data\raw\flickr8k data\manifests src\train src\inference src\evaluate outputs checkpoints scripts
+
+REM Place dataset in data\raw\flickr8k\Images\ and Flickr8k.token.txt
+
+python - <<PY
+# same small manifest generator as above (paste into cmd shell if your cmd supports it)
+PY
+
+python src\train\train_baseline.py --manifest data/manifests/flickr8k.json --epochs 1 --batch_size 16 --ckpt_dir checkpoints
+python src\inference\generate.py --ckpt checkpoints\baseline_initial.pt --manifest data/manifests\flickr8k.json --out outputs\predictions.jsonl --num 200
+python src\evaluate\eval_captions.py --pred outputs\predictions.jsonl --ref data\manifests\flickr8k.json
+
+
+(If your cmd shell doesn’t like the inline python block, run a short prepare_flickr8k.py script I can paste for you.)
+
+Minimal success checks
+
+After step 3: data\manifests\flickr8k.json exists and n_images > 0.
+
+After step 4: checkpoints\baseline_initial.pt exists.
+
+After step 5: outputs\predictions.jsonl exists (open first 5 lines).
+
+After step 6: evaluator prints a BLEU number and shows a few reference/pred pairs.
+
+If you don’t have the train/generate/eval scripts yet
+
+Tell me which file you want and I’ll paste the smallest runnable version (train, generate, or eval). You’ve already said you’ve made models before — I’ll provide minimal code that uses a frozen ResNet + small LSTM decoder so it runs fast.
+
+Next small improvements (optional, later)
+
+Replace simple tokenizer with SentencePiece (better vocab).
+
+Add logging (print/save loss each epoch).
+
+Increase dataset size / epochs when comfortable.
+
+Ready to run the three commands above now? If any command errors, paste the exact error text and I’ll give a one-line fix. If you want the small train_baseline.py / generate.py / eval_captions.py files pasted now (Windows-ready), say which one and I’ll paste it immediately.
