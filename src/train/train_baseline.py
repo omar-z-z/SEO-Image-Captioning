@@ -2,6 +2,7 @@
 import argparse
 import json
 import os
+import random
 from pathlib import Path
 from collections import defaultdict
 
@@ -52,7 +53,8 @@ class CaptionDataset(Dataset):
         if self.transform:
             img = self.transform(img)
         # pick first caption
-        cap = it["captions"][0]
+        cap = random.choice(it["captions"])
+        # cap = it["captions"][0] # always first caption
         ids = self.tok.encode(cap, max_len=self.max_len)
         if len(ids) < self.max_len:
             ids = ids + [0]*(self.max_len - len(ids))
@@ -104,13 +106,14 @@ def train(args):
     all_caps = [it["captions"] for it in manifest["items"]]
     tok = SimpleTokenizer()
     tok.build(all_caps)
+    print(tok)
     transform = transforms.Compose([transforms.Resize((224,224)), transforms.ToTensor()])
     ds = CaptionDataset(manifest, tok, transform=transform, max_len=args.max_len)
     loader = DataLoader(ds, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
-    encoder = ImageEncoder().to(device)
+    encoder = ImageEncoder().to(device) # this encoder outputs 512-dim features
     decoder = DecoderLSTM(vocab_size=len(tok.word2idx), embed_dim=128, hidden=256, img_dim=512).to(device)
-    criterion = nn.CrossEntropyLoss(ignore_index=0)
-    optimizer = torch.optim.Adam(decoder.parameters(), lr=1e-3)
+    criterion = nn.CrossEntropyLoss(ignore_index=0, label_smoothing=0.1)
+    optimizer = torch.optim.Adam(decoder.parameters(), lr=1e-3, weight_decay=1e-4)
     start_epoch = 0
     if args.resume is not None and os.path.exists(args.resume):
         print(f"Loading checkpoint from {args.resume}")
@@ -136,6 +139,7 @@ def train(args):
             loss = criterion(logits.view(-1, logits.size(-1)), caps[:,1:].reshape(-1))
             optimizer.zero_grad()
             loss.backward()
+            nn.utils.clip_grad_norm_(decoder.parameters(), max_norm=1.0)
             optimizer.step()
             total_loss += loss.item()
         print(f"Epoch {epoch+1}/{args.epochs} avg_loss={(total_loss/len(loader)):.4f}")
@@ -146,16 +150,16 @@ def train(args):
         "vocab": tok.word2idx,
         "epoch": epoch + 1
     }
-    torch.save(ckpt, os.path.join(args.ckpt_dir, "baseline_third.pt"))
-    print("Saved checkpoint to", os.path.join(args.ckpt_dir, "baseline_third.pt"))
+    torch.save(ckpt, os.path.join(args.ckpt_dir, "baseline_1.pt"))
+    print("Saved checkpoint to", os.path.join(args.ckpt_dir, "baseline_1.pt"))
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--manifest", default="data/manifests/flickr8k.json")
-    p.add_argument("--epochs", type=int, default=30)
+    p.add_argument("--epochs", type=int, default=10)
     p.add_argument("--batch_size", type=int, default=16)
     p.add_argument("--max_len", type=int, default=20)
     p.add_argument("--ckpt_dir", default="checkpoints")
-    p.add_argument("--resume", type=str, default="checkpoints/baseline_second.pt")
+    p.add_argument("--resume", type=str, default=None)
     args = p.parse_args()
     train(args)
