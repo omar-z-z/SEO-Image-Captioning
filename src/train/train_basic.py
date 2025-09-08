@@ -122,7 +122,7 @@ def train(args):
 
     transform = transforms.Compose([
         transforms.Resize((224,224)),
-        transforms.RandomHorizontalFlip(p=0.5),
+        # transforms.RandomHorizontalFlip(p=0.5),
         transforms.ToTensor(),
         transforms.Normalize(mean, std),
     ])
@@ -131,10 +131,13 @@ def train(args):
     loader = DataLoader(ds, batch_size=args.batch_size, shuffle=True, collate_fn=collate_fn)
 
     encoder = ImageEncoder().to(device)
+    encoder.eval()
     decoder = DecoderLSTM(vocab_size=len(tok.word2idx), embed_dim=128, hidden=256, img_dim=512).to(device)
 
-    criterion = nn.CrossEntropyLoss(ignore_index=0, label_smoothing=0.1)
-    optimizer = torch.optim.Adam(decoder.parameters(), lr=3e-3, weight_decay=1e-4)
+    # criterion = nn.CrossEntropyLoss(ignore_index=0, label_smoothing=0.1)
+    # optimizer = torch.optim.Adam(decoder.parameters(), lr=3e-3, weight_decay=1e-4)
+    criterion = nn.CrossEntropyLoss(ignore_index=0)  # no label_smoothing
+    optimizer = torch.optim.Adam(decoder.parameters(), lr=3e-4)  # was 3e-3
 
     start_epoch = 0
     if args.resume is not None and os.path.exists(args.resume):
