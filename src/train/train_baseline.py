@@ -1,4 +1,6 @@
-#!/usr/bin/env python3
+# In this training i trained the model 3 times, each with 10 epochs, and saved the model after each training session.
+# The checkpoints are named baseline_initial.pt, baseline_second.pt, and baseline_third.pt respectively.
+# I trained the model for a total of 30 epochs, all the epochs wererun on the same dataset, which is the manifest file located at data/manifests/flickr8k1F8091I.json.
 import argparse
 import json
 import os

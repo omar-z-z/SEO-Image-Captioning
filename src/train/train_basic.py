@@ -1,4 +1,11 @@
-#!/usr/bin/env python3
+# In this training i trained the model 10 times, each with 10 epochs, and saved the model after each training session.
+# The checkpoints are named baseline_1.pt, baseline_2.pt,..., and baseline_10.pt respectively.
+# I trained the model for a total of 100 epochs, all the epochs were run on the different dataset.
+# Each with the manifest flickr8k1F800I.json then flickr8k2F800I.json and so on until flickr8k10F8090I.json
+
+# Then I trained the model 3 times, one with 100 epoches, then 300 epochs, and finally 100 epochs, to reach a total of 500 epochs.
+# The checkpoints are named baseline_trial.pt, baseline_trial_1.pt, and baseline_trial_2.pt respectively.
+# I trained the model on a small manefist of 32 samples to check the code and training loop, the manifest file located at data/manifests/flickr8k1F32I.json.
 import argparse
 import json
 import os

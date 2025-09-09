@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import argparse
 import json
 from pathlib import Path
@@ -61,7 +60,7 @@ def greedy_decode(encoder, decoder, imgs, vocab, max_len=20, device="cpu"):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--ckpt", default="checkpoints/baseline_third.pt")
+    p.add_argument("--ckpt", default="checkpoints/baseline.pt")
     p.add_argument("--manifest", default="data/manifests/flickr8k1F8091I.json")
     p.add_argument("--out", default="outputs/predictions_old.json")
     p.add_argument("--num", type=int, default=200)

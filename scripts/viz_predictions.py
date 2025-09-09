@@ -8,7 +8,7 @@ from pathlib import Path
 from PIL import Image
 import matplotlib.pyplot as plt
 
-
+# loading the manifest
 def load_manifest(manifest_path):
     with open(manifest_path, "r", encoding="utf8") as f:
         man = json.load(f)
@@ -20,7 +20,7 @@ def load_manifest(manifest_path):
             id2path[iid] = ipath
     return id2path
 
-
+# loading the predictions
 def load_predictions(pred_path):
     preds = []
     with open(pred_path, "r", encoding="utf8") as f:
