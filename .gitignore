@@ -5,6 +5,7 @@ data/*
 !data/manifests/
 !data/prepare_flickr8k.py
 data/data/
+!cache/
 
 
 >>>>>>> 43e001a (First real commit)
