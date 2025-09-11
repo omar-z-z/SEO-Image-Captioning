@@ -4,6 +4,8 @@ data/*
 !data/
 !data/manifests/
 !data/prepare_flickr8k.py
+!data/seo/
+!data/prepare_flickr8k_for_seo.py
 data/data/
 cache/
 
