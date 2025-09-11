@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+# this file evaluates the SEO quality of generated captions using heuristic metrics
 import json
 from statistics import mean
 from src.seo.metrics import score_record

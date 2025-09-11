@@ -1,3 +1,4 @@
+# this file contains functions to compute SEO-related metrics for generated captions
 import math
 from typing import List, Dict
 

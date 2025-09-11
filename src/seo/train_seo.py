@@ -1,3 +1,4 @@
+# this file is used to train the SEO captioning model even more, it is not used in inference (optional)
 import json
 from pathlib import Path
 from datasets import load_dataset

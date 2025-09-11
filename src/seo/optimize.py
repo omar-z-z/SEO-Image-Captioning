@@ -1,3 +1,4 @@
+# this is the main file to optimize captions for SEO using a pre-trained language model
 import json
 from typing import List, Dict, Optional
 import argparse
