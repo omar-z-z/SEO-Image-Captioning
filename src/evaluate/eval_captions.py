@@ -22,8 +22,8 @@ def load_preds(pred_path):
 
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument("--pred", default="outputs/predictions.jsonl")
-    p.add_argument("--ref", default="data/manifests/flickr8k.json")
+    p.add_argument("--pred", default="outputs/predictions.json")
+    p.add_argument("--ref", default="data/manifests/flickr8k1F8091I.json")
     args = p.parse_args()
     refs = load_refs(args.ref)
     preds = load_preds(args.pred)
