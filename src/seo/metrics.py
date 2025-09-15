@@ -3,16 +3,16 @@ import math
 from typing import List, Dict
 
 def keyword_recall(pred: str, keywords: List[str]) -> float:
-    if not keywords: return 1.0
+    if not keywords: return None
     pred_l = pred.lower()
     hit = sum(1 for k in keywords if k.lower() in pred_l)
     return hit / len(keywords)
 
-def keyword_frontload_score(pred: str, keywords: List[str]) -> float:
-    if not keywords: return 1.0
+def keyword_frontload_score(pred: str, keywords: List[str], window: int = 70) -> float | None:
+    if not keywords: return None
     pred_l = pred.lower()
-    first_70 = pred_l[:70]
-    hits_front = sum(1 for k in keywords if k.lower() in first_70)
+    first = pred_l[:window]
+    hits_front = sum(1 for k in keywords if k.lower() in first)
     return hits_front / max(1, len(keywords))
 
 def length_score(pred: str, lo: int = 110, hi: int = 160) -> float:
